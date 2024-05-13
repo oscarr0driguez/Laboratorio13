@@ -1,0 +1,109 @@
+﻿@page "/Libro"
+@inject HttpClient Http
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject NavigationManager NavigationManager
+
+<h3>Libros</h3>
+
+<EditForm Model="@libro">
+
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="Nombre">Nombre del Libro</label>
+        <InputText id="Nombre" @bind-Value="libro.NombreProducto" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="Apellido">Descripcion del Libro</label>
+        <InputText id="Apellido" @bind-Value="libro.Descripcion" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="Direccion">Precio de compra</label>
+        <InputNumber id="Direccion" @bind-Value="libro.precioCompra" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="FechaNacimiento">Precio de venta</label>
+        <InputNumber id="FechaNacimiento" @bind-Value="libro.precioVenta" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="Titulo">Editorial</label>
+        <InputText id="Titulo" @bind-Value="libro.Editorial" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="Colegiado">Categoria</label>
+        <InputText id="Colegiado" @bind-Value="libro.Categoria" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="Titulo">Autor</label>
+        <InputText id="Titulo" @bind-Value="libro.Autor" class="form-control" />
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary" @onclick="@Guardar">Guardar</button>
+    </div>
+</EditForm>
+
+@if (libros != null)
+{
+<table class="table">
+    <thead>
+        <tr>
+            <th>NombreProducto</th>
+            <th>Descripcion</th>
+            <th>PrecioCompra</th>
+            <th>PrecioVenta</th>
+            <th>Editorial</th>
+            <th>Categoria</th>
+            <th>Autor</th>
+            <th>Eliminar</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var libro in libros)
+        {
+<tr>
+    <td>@libro.NombreProducto </td>
+    <td>@libro.Descripcion</td>
+    <td>@libro.precioCompra  </td>
+    <td>@libro.precioVenta </td>
+    <td>@libro.Editorial</td>
+    <td>@libro.Categoria</td>
+    <td>@libro.Autor</td>
+    <td>
+        <button class="btn btn-warning"
+                @onclick="@(() => NavigationManager.NavigateTo($"/Libro-editar/{libro.CodigoProducto}"))">
+            Editar
+        </button>
+    </td>
+    <td><button class="btn btn-danger" @onclick="@(() => BorrarLibro(libro.CodigoProducto))">Eliminar</button></td>
+</tr>
+}
+    </tbody>
+</table>}
+
+@code { private Libros libro = new Libros();
+            List<Libros> libros = new List<Libros>();
+
+
+            protected async Task Guardar()
+            {
+                libros.Add(libro);
+
+                await localStorage.SetItemAsync("libros", libros);
+
+            }
+
+            protected override async Task OnInitializedAsync()
+            {   //La primera vez que se corre poner en comentarios, pues como no existen datos
+                //convierta la lista catedraticos en null
+                libros = await localStorage.GetItemAsync<List<Libros>>("libros");
+                if (libros == null)
+                    libros = new List<Libros>();
+            }
+
+            protected async Task BorrarLibro(string CodigoProducto)
+            {
+                libros.Remove(libros.Find(c => c.CodigoProducto == CodigoProducto));
+                await localStorage.SetItemAsync("libros", libros);
+
+            } }
